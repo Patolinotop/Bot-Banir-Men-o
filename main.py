@@ -1,12 +1,11 @@
-import os
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 from datetime import timedelta
 
-load_dotenv()
+TOKEN = "SEU_TOKEN_AQUI"
 
-TOKEN = os.getenv("DISCORD_TOKEN")
+# ID da pessoa que NÃO pode ser mencionada
+PROTECTED_USER_ID = 1331505963622076476
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -16,32 +15,35 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"🤖 Bot conectado como {bot.user}")
+    print(f"Bot conectado como {bot.user}")
 
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author.bot:
         return
 
-    if not message.guild:
-        return
+    # Verifica se a pessoa protegida foi mencionada
+    for mention in message.mentions:
+        if mention.id == PROTECTED_USER_ID:
+            try:
+                # Timeout de 1 dia
+                await message.author.timeout(
+                    timedelta(days=1),
+                    reason="Menção proibida"
+                )
 
-    owner_id = message.guild.owner_id
-
-    # Verifica se mencionou o dono
-    if message.mentions and any(user.id == owner_id for user in message.mentions):
-        member = message.author
-
-        # Tempo do mute (ex: 10 minutos)
-        duration = timedelta(minutes=10)
-
-        try:
-            await member.timeout(duration, reason="Mencionou o dono do servidor")
-            await message.reply("🚫 Não mencione o dono do servidor.")
-        except discord.Forbidden:
-            print("❌ Sem permissão para mutar")
-        except Exception as e:
-            print(e)
+                await message.channel.send(
+                    f"{message.author.mention} foi mutado por 1 dia por mencionar usuário proibido."
+                )
+            except discord.Forbidden:
+                await message.channel.send(
+                    "❌ Não tenho permissão para mutar este usuário."
+                )
+            except Exception as e:
+                await message.channel.send(
+                    f"Erro ao mutar usuário: {e}"
+                )
+            break
 
     await bot.process_commands(message)
 
