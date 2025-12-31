@@ -4,17 +4,13 @@ from datetime import timedelta
 import os
 import hashlib
 
-token = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_TOKEN")
 
-if not token:
-    print("❌ TOKEN NÃO CHEGOU")
+if not TOKEN:
+    raise RuntimeError("❌ DISCORD_TOKEN não encontrado")
 else:
-    print("✅ TOKEN CHEGOU | hash:", hashlib.sha256(token.encode()).hexdigest())
+    print("✅ TOKEN CHEGOU | hash:", hashlib.sha256(TOKEN.encode()).hexdigest())
 
-
-TOKEN = "MTQ1NTcyNDMyMzk2Nzk5MTk2NA.G09BAf.6RNU5RLHAWX0eNmq2bLRr3c2YWamc5-poP28M0"
-
-# ID da pessoa que NÃO pode ser mencionada
 PROTECTED_USER_ID = 1331505963622076476
 
 intents = discord.Intents.default()
@@ -25,35 +21,21 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Bot conectado como {bot.user}")
+    print(f"✅ Bot conectado como {bot.user}")
 
 @bot.event
-async def on_message(message: discord.Message):
+async def on_message(message):
     if message.author.bot:
         return
 
-    # Verifica se a pessoa protegida foi mencionada
-    for mention in message.mentions:
-        if mention.id == PROTECTED_USER_ID:
-            try:
-                # Timeout de 1 dia
-                await message.author.timeout(
-                    timedelta(days=1),
-                    reason="Menção proibida"
-                )
-
-                await message.channel.send(
-                    f"{message.author.mention} foi mutado por 1 dia por mencionar usuário proibido."
-                )
-            except discord.Forbidden:
-                await message.channel.send(
-                    "❌ Não tenho permissão para mutar este usuário."
-                )
-            except Exception as e:
-                await message.channel.send(
-                    f"Erro ao mutar usuário: {e}"
-                )
-            break
+    if any(u.id == PROTECTED_USER_ID for u in message.mentions):
+        await message.author.timeout(
+            timedelta(days=1),
+            reason="Menção proibida"
+        )
+        await message.channel.send(
+            f"🔇 {message.author.mention} mutado por 1 dia."
+        )
 
     await bot.process_commands(message)
 
