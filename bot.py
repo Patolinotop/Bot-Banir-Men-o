@@ -12,7 +12,7 @@ else:
     print("✅ TOKEN CHEGOU | hash:", hashlib.sha256(token.encode()).hexdigest())
 
 
-TOKEN = "SEU_TOKEN_AQUI"
+TOKEN = "MTQ1NTcyNDMyMzk2Nzk5MTk2NA.G09BAf.6RNU5RLHAWX0eNmq2bLRr3c2YWamc5-poP28M0"
 
 # ID da pessoa que NÃO pode ser mencionada
 PROTECTED_USER_ID = 1331505963622076476
