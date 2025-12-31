@@ -1,6 +1,16 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
+import os
+import hashlib
+
+token = os.getenv("DISCORD_TOKEN")
+
+if not token:
+    print("❌ TOKEN NÃO CHEGOU")
+else:
+    print("✅ TOKEN CHEGOU | hash:", hashlib.sha256(token.encode()).hexdigest())
+
 
 TOKEN = "SEU_TOKEN_AQUI"
 
